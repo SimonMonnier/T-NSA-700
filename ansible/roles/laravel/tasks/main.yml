@@ -1,0 +1,62 @@
+---
+
+- name: Install apache composer rsync
+  apt:
+    name: 
+      - apache2
+      - composer
+      - rsync
+    state: latest
+
+- name: Install php and its modules
+  apt:
+    name: "php7.4,php7.4-mysql,php7.4-xml,php7.4-mbstring,php7.4-gd,php7.4-intl"
+    state: latest
+
+# ansible-galaxy collection install community.general
+- name: Install laravel
+  community.general.composer:
+    command: require
+    global_command: yes
+    arguments: laravel/installer
+
+- name: Add laravel to PATH
+  copy:
+    content: "export PATH=$PATH:~/.config/composer/vendor/bin"
+    dest: "/etc/profile.d/my_path.sh"
+
+- name: Copying website conf
+  become: true
+  copy:
+    src: ../../../laravel.conf
+    dest: /etc/apache2/sites-available/laravel.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copying ports conf
+  become: true
+  copy:
+    src: ../../../ports.conf
+    dest: /etc/apache2/ports.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: a2ensite
+  command: a2ensite laravel
+  args:
+    creates: /etc/apache2/sites-enabled/laravel.conf
+
+- name: rewrite
+  command: a2enmod rewrite
+
+- name: headers
+  command: a2enmod headers
+
+- name: restart apache
+  service:
+    name: apache2
+    state: restarted
+
+

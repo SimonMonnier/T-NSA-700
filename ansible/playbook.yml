@@ -1,0 +1,10 @@
+- hosts: web
+  roles:
+    - angular
+    - laravel
+    
+- hosts: mysql
+  vars_files:
+    - roles/mysql/tasks/variables.yml
+  roles:
+    - mysql

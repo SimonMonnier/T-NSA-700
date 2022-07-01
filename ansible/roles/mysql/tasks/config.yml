@@ -1,0 +1,30 @@
+- name: Configure MariaDB
+  become: yes
+  become_method: sudo
+  block:
+  # ansible-galaxy collection install community.mysql
+  - name: Create database user preprod
+    community.mysql.mysql_user:
+      name: "{{DB_USERNAME}}"
+      password: "{{DB_PASSWORD}}"
+      priv: '*.*:ALL'
+      host: 192.168.184.206
+      state: present
+
+  - name: "Create preprod database"
+    mysql_db:
+      login_user: "{{DB_USERNAME}}"
+      login_password: "{{DB_PASSWORD}}"
+      db: "{{DB_DATABASE}}"
+      state: present
+  - name: Add a line to a file if the file does not exist, without passing regexp
+    lineinfile:
+      path: /etc/mysql/my.cnf
+      line: "{{ item }}"
+    with_items: 
+      - '[mysqld]'
+      - 'bind-address = 0.0.0.0'
+  - name: restart mysql
+    service: 
+      name: mysql
+      state: restarted

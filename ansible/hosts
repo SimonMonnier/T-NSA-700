@@ -1,0 +1,4 @@
+[web]
+192.168.184.206 ansible_python_interpreter=/usr/bin/python3 ansible_ssh_user=root
+[mysql]
+mysql_server ansible_host=192.168.184.220 ansible_ssh_user=root
